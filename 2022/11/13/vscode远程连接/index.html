@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          vscode远程连接 - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <p>先把虚拟机需要的环境配置一下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install openssh-server</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install curl</span><br></pre></td></tr></table></figure>
+
+<p>接着在物理机上创建一下ssh密匙</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -b 4096 -f %USERPROFILE%/.ssh/debian_rsa</span><br></pre></td></tr></table></figure>
+
+<p>然后自己下载一个vscode</p>
+<p>下载后打开 在扩展中搜索remote</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/zFfZA1"><img src="https://s1.ax1x.com/2022/11/13/zFfZA1.png" alt="zFfZA1.png"></a></p>
+<p>安装这个 然后进入到设置里面勾选这个</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/zFfmh6"><img src="https://s1.ax1x.com/2022/11/13/zFfmh6.png" alt="zFfmh6.png"></a></p>
+<p>然后左下角会多出来一个绿色的图标 按图上的点击顺序</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/zFfJAI"><img src="https://s1.ax1x.com/2022/11/13/zFfJAI.png" alt="zFfJAI.png"></a></p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/zFfa38"><img src="https://s1.ax1x.com/2022/11/13/zFfa38.png" alt="zFfa38.png"></a></p>
+<p>选择第一个</p>
+<p>然后自行配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Host 名称</span><br><span class="line">HostName ip地址</span><br><span class="line">User 虚拟机用户名</span><br><span class="line">IdentityFile &quot;C:\Users\xxxxx\.ssh\debian_rsa&quot;  //物理机的ssh私匙目录</span><br></pre></td></tr></table></figure>
+
+<p>接着试着连接一下</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/zFhAxS"><img src="https://s1.ax1x.com/2022/11/13/zFhAxS.png" alt="zFhAxS.png"></a></p>
+<p>输入密码后就连接上了虚拟机</p>
+<p>但是每次都输入密码太麻烦了 我们之前弄的ssh就是为了免密连接</p>
+<p><a target="_blank" rel="noopener" href="https://imgse.com/i/zFhuan"><img src="https://s1.ax1x.com/2022/11/13/zFhuan.png" alt="zFhuan.png"></a></p>
+<p>在虚拟机对应目录下 创建一个文件authorized_keys</p>
+<p>接着把物理机中该文件的内容复制到虚拟机刚刚创建的文件中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\xxxx\.ssh\debian_rsa.pub</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以做到免密连接了 </p>
+<h1 id="2023-3-6记"><a href="#2023-3-6记" class="headerlink" title="2023&#x2F;3&#x2F;6记"></a>2023&#x2F;3&#x2F;6记</h1><p>今天配置kali虚拟机的远程连接的时候迟迟连接不上 原来是因为ssh服务并没有启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 重启ssh 服务 sudo service ssh --full-restart</span><br><span class="line">// 自动启动 sudo systemctl enable ssh</span><br></pre></td></tr></table></figure>
+
+<h1 id="2024-11-7记"><a href="#2024-11-7记" class="headerlink" title="2024&#x2F;11&#x2F;7记"></a>2024&#x2F;11&#x2F;7记</h1><p>部分机子 比如kali或者云服务器 可能没有开启免密连接的权限<br>打开&#x2F;etc&#x2F;ssh&#x2F;sshd_config<br>找到对应项 更改为yes 并且指定密钥文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PubkeyAuthentication yes</span><br><span class="line">AuthorizedKeysFile .ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+<p>随后重启ssh服务即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2022-11-13</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/extra/">extra</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

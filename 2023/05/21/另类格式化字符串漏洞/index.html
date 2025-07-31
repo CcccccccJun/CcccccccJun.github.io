@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          另类格式化字符串漏洞 - C12en
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectre.css/0.5.9/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>C12EN</span>
+  </a>
+</div>
+    <div id="menu" class="book-menu hide">
+  
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          <div class="book-post">
+  <p>这篇主要介绍的是spritf函数引起的格式化字符串漏洞 总体的利用方式和printf是一样的</p>
+<p>先来看一下sprintf函数的用法 其一共有三个参数 在不使用格式化字符的情况下 第三个参数可有可无</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">vuln</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">0x20</span>];</span><br><span class="line">    <span class="built_in">sprintf</span>(buf,<span class="string">&quot;hello\n&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(buf);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    vuln();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要的作用就是把hello这个字符串读入到buf数组变量中 来看一下运行的结果</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305212130349.png" alt="image-20230521213031676"></p>
+<p>如果使用上格式化字符</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">vuln</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">0x20</span>];</span><br><span class="line">    <span class="type">char</span> a[<span class="number">0x20</span>] = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">    <span class="built_in">sprintf</span>(buf,<span class="string">&quot;%s\n&quot;</span>,a);</span><br><span class="line">    <span class="built_in">printf</span>(buf);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    vuln();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305212234505.png" alt="image-20230521223418469"></p>
+<p>这里可能会误解为传入到buf中的值是%shello 随后是给予printf函数利用格式化字符串输出 其实不然 这里替换成puts来试一下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">vuln</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">0x20</span>];</span><br><span class="line">    <span class="type">char</span> a[<span class="number">0x20</span>] = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">    <span class="built_in">sprintf</span>(buf,<span class="string">&quot;%s&quot;</span>,a);</span><br><span class="line">    <span class="built_in">puts</span>(buf);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    vuln();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>断点打在sprintf函数这里来看一下</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305212246747.png" alt="image-20230521224625727"></p>
+<p>来看执行后0x7fffffffe050地址的值会被赋值成什么</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305212246403.png" alt="image-20230521224657382"></p>
+<p>由此可见 这里的格式化字符实际是决定vararg参数存储的类型 如果我们替换成%p呢</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305212251180.png" alt="image-20230521225123155"></p>
+<p>印证了猜想 那么%n呢 这个printf最强大的漏洞 可以做到任意地址写任意值 在这里是否奏效呢</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">vuln</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">0x20</span>];</span><br><span class="line">    <span class="built_in">sprintf</span>(buf,<span class="string">&quot;a%7$n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    vuln();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不同于其他格式化字符 %n在sprintf就可以起到任意写的作用 同时又和printf一样 默认是修改4个字节 如果想要修改8字节 就需要lln</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305221241813.png" alt="image-20230522124145728"></p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305221241208.png" alt="image-20230522124156175"></p>
+<p>如果我们修改蓝框中的值 使其占满8字节 再来覆盖看看</p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305221242401.png" alt="image-20230522124239370"></p>
+<p><img src="https://blog-1259781238.cos.ap-nanjing.myqcloud.com/202305221242262.png" alt="image-20230522124248229"></p>
+<p>本质还是和printf差不多 在关键的任意写这块漏洞利用上</p>
+
+</div>
+
+
+  <div class="book-comments">
+    
+
+
+
+
+  </div>
+
+
+
+<script src="/js/book-post.js"></script>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="C"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>C12en</div>
+      <div>2023-05-21</div>
+    </div>
+  </div>
+
+  
+    <div class="divider"></div>
+
+    <div class="link">
+      <a class="category-link" href="/categories/stack/">stack</a>
+
+      
+    </div>
+    
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>
